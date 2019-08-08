@@ -4,6 +4,7 @@ import pandas as pd
 from getChannels import getChannelIds
 from getChannels import tests
 from pandas.io.json import json_normalize
+from DataProcess import *
 
 apiToken = 'ApiToken f058958a-d8bd-47cc-95d7-7ecf98610e47'
 
@@ -113,4 +114,7 @@ if __name__ == '__main__':
     print(times)
     print("*******channels******")
     print(channels)
+    print("*******dataFrames****")
+    datafs = createDataFrame(file_name='july_2019-7.json')
+
     #tests()

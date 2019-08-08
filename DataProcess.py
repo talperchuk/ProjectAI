@@ -12,7 +12,7 @@ format = "%Y-%m-%d"
 def createDataFrame(file_name):
     features_list = list(getChannelIds())
     features_list.append('datetime')
-    id, times, channels, msrmnts = getChannelsDataFromJSON(file_name='aug_2019-8.json')
+    id, times, channels, msrmnts = getChannelsDataFromJSON(file_name=file_name)
     t = time.strptime(times[0].split("T")[0], format)
     tmp = pd.DataFrame()
     data_frames_per_day = {}
