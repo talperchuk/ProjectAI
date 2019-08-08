@@ -13,7 +13,7 @@ def createDataFrame(file_name):
     features_list = list(getChannelIds())
     features_list.append('datetime')
     id, times, channels, msrmnts = getChannelsDataFromJSON(file_name=file_name)
-    t = time.strptime(times[0].split("T")[0], format)
+    #t = time.strptime(times[0].split("T")[0], format)
     tmp = pd.DataFrame()
     data_frames_per_day = {}
     for x in msrmnts:
@@ -23,4 +23,6 @@ def createDataFrame(file_name):
         df = pd.DataFrame(msrmnts[x], columns=features_list).set_index('datetime')
         tmp = tmp.append(df)
         data_frames_per_day[x_t] = tmp  # can reduce times by less insertions.
-    return data_frames_per_day
+    for frame in data_frames_per_day:
+        data_frames_per_day[frame] = data_frames_per_day[frame].mean(axis=0)
+    return pd.DataFrame(data_frames_per_day).transpose()

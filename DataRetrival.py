@@ -116,5 +116,5 @@ if __name__ == '__main__':
     print(channels)
     print("*******dataFrames****")
     datafs = createDataFrame(file_name='july_2019-7.json')
-
+    print(datafs)
     #tests()
