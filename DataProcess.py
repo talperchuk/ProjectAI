@@ -11,6 +11,43 @@ from GetChannels import getChannelIds
 
 format = "%Y-%m-%d"
 
+directions = ['North', 'North-West', 'West', 'South-West', 'South', 'South-East', 'East', 'North-East']
+
+def setWDForOHE(df):
+    wd_feature = df.WD.tolist()
+    for i in range(len(wd_feature)):
+        if wd_feature[i] == 0 or wd_feature[i] == 360:
+            wd_feature[i] = 'East'
+        elif 0 < wd_feature[i] < 90:
+            wd_feature[i] = 'North-East'
+        elif wd_feature[i] == 90:
+            wd_feature[i] = 'North'
+        elif 90 < wd_feature[i] < 180:
+            wd_feature[i] = 'North-West'
+        elif wd_feature[i] == 180:
+            wd_feature[i] = 'West'
+        elif 180 < wd_feature[i] < 270:
+            wd_feature[i] = 'South-West'
+        elif wd_feature[i] == 270:
+            wd_feature[i] = 'South'
+        elif 270 < wd_feature[i] < 360:
+            wd_feature[i] = 'South-East'
+        else:
+            wd_feature[i] = 'Fail'#need to fix this, find a solution for NaNs
+    return wd_feature
+
+
+def setOHEToDF(df, wd_feature):
+    df.drop('WD', axis=1, inplace=True)
+    df.insert(len(df.columns), "WD", wd_feature, True)
+    dummies = pd.get_dummies(df.WD)
+    res = pd.concat([df, dummies], axis='columns')
+    res.drop('WD', axis=1, inplace=True)
+    complement_direction = list(set(directions) - set(wd_feature))
+    complement_direction_zero = np.zeros((res.shape[0], len(complement_direction)), dtype=int)
+    complement_direction_df = pd.DataFrame(complement_direction_zero, index=res.index, columns=complement_direction)
+    df_after_ohe = pd.concat([res, complement_direction_df], axis='columns')
+    return df_after_ohe
 
 def getChannelsDataFromJSON(file_name='dailyTarget.json'):
     with open('./data/' + file_name, 'r') as f:
@@ -50,4 +87,43 @@ def createDataFrame(file_name):
         data_frames_per_day[measurement_time] = measurement_data_frame  # can reduce times by less insertions.
     for frame in data_frames_per_day:
         data_frames_per_day[frame] = data_frames_per_day[frame].mean(axis=0)
-    return pd.DataFrame(data_frames_per_day).transpose()
+    returned_df = pd.DataFrame(data_frames_per_day).transpose()
+    wd_feature = setWDForOHE(returned_df)
+    returned_df = setOHEToDF(returned_df, wd_feature)
+    returned_df.to_csv('./data/df_with_wind_directions.csv')
+    return returned_df
+
+
+def addPreviousDaysPerFeature(data_frame, feature, amount=1):
+    rows_size = data_frame.shape[0]
+    new_column = [np.NaN] * amount
+    new_column = new_column + [data_frame[feature][i-amount] for i in range(amount, rows_size)]
+    new_column_name = "{}_{}".format(feature, amount)
+    data_frame[new_column_name] = new_column
+
+
+def addPreviousDaysFeatures(data_frame, amount=1):
+    features = list(data_frame)
+    for feature in features:
+        for i in range(1, amount):
+            addPreviousDaysPerFeature(data_frame, feature, i)
+
+
+def getCorrelationOfDataForFeature(data_frame, feature):
+    return data_frame.corr()[[feature]].sort_values(feature)
+
+
+def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicators, reshape_x, reshape_y):
+    new_dataframe = data_frame[[main_feature] + predicators]
+    plt.rcParams['figure.figsize'] = [16, 22]
+    fig, axes = plt.subplots(nrows=reshape_x, ncols=reshape_y, sharey=True)
+    arr = np.array(predicators).reshape(reshape_x, reshape_y)
+    for row, col_arr in enumerate(arr):
+        for col, feature in enumerate(col_arr):
+            print("**df2[feature] is: {}\n{}".format(feature, new_dataframe[feature]))
+            axes[row, col].scatter(new_dataframe[feature], new_dataframe[main_feature])
+            if col == 0:
+                axes[row, col].set(xlabel=feature, ylabel=main_feature)
+            else:
+                axes[row, col].set(xlabel=feature)
+    plt.show()

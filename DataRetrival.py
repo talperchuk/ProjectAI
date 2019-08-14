@@ -2,7 +2,6 @@ import requests
 import json
 import pandas as pd
 import numpy as np
-from DataProcess import *
 
 
 apiToken = 'ApiToken f058958a-d8bd-47cc-95d7-7ecf98610e47'
