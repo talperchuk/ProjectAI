@@ -41,13 +41,13 @@ if __name__ == '__main__':
     #getStationMonthlyData(43, file_name="aug")
     #getStationDailyDataForDate(43, year=2018, month=12, day=23, file_name="day")
     #getStationMonthlyDataForMonth(43, year=2019, month=7, file_name="july")
-    #getStationRangeData(43, 2018, 6, 1, 2018, 12, 31, file_name='secHalf')
+    #getStationRangeData(36, 2018, 1, 1, 2018, 12, 31, file_name='yotvata')
     #getStations(file_name='all_')
     features = getChannelIds()
     print(features.keys())
     print(list(features))
     print(features.values())
-    id, times, channels, msrmnts = getChannelsDataFromJSON(file_name='july_2019-7.json')
+    #id, times, channels, msrmnts = getChannelsDataFromJSON(file_name='july_2019-7.json')
     #print(features)
     print("*******id******")
     #print(id)
@@ -56,32 +56,23 @@ if __name__ == '__main__':
     print("*******channels******")
     #print(channels)
     print("*******dataFrames****")
-    datafs = createDataFrame(file_name='secHalf_2018-6-1-2018-12-31.json')
+    datafs = createDataFrame(file_name='yotvata_2018-1-1-2018-12-31.json')
     #print(type(datafs))
-    print(datafs)
+    print(str(datafs))
+    #heatmap
+"""
+    createHeatMap(datafs)
+
     print("*******Extended features******")
-    predicators = ['NIP', 'NIP_2', 'NIP_1', 'NIP_3', 'Grad_3', 'Grad', 'Grad_2', 'Grad_1', 'TDmax_3', 'TD_3', 'TDmin_3', 'TDmax_2', 'TD_2', 'TDmin_2', 'TDmax_1', 'TD_1', 'TDmin_1', 'TDmax' ]
+    predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
     addPreviousDaysFeatures(datafs, 4)
     # calc correlation
-    #print(datafs.corr()[['TD']].sort_values('TD'))
-    df2 = datafs[['TD'] + predicators]
-    #create corr graphs
-    """below graphs shows the lineariti of """
-    plt.rcParams['figure.figsize'] = [16, 22]
-    fig, axes = plt.subplots(nrows=6, ncols=3, sharey=True)
-    arr = np.array(predicators).reshape(6, 3)
-    for row, col_arr in enumerate(arr):
-        for col, feature in enumerate(col_arr):
-            print("**df2[feature] is: {}\n{}".format(feature, df2[feature]))
-            axes[row, col].scatter(df2[feature], df2['TD'])
-            if col == 0:
-                axes[row, col].set(xlabel=feature, ylabel='TD')
-            else:
-                axes[row, col].set(xlabel=feature)
-    plt.show()
+    print(getCorrelationOfDataForFeature(datafs, 'TD'))
+    #creating correlation graphs
+    createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', predicators, 6, 3)
+
     #tests()
     #### deriving the features
-    """
     tmp = datafs[['TDmax', 'TDmin', 'TD']]
     print("*******dataFramesInfo****")
     print(tmp.info())
@@ -104,4 +95,13 @@ if __name__ == '__main__':
     plt.title('Distribution of TDmin')
     plt.xlabel('TDmin')
     plt.show()
-    """
+"""
+
+#try to classify.
+addPreviousDaysFeatures(datafs, 4)
+print("**corr**")
+corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
+
+predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
+new_dataframe = datafs[['TD'] + pred]
+createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', predicators, len(pred), 1)

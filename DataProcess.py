@@ -6,8 +6,11 @@ import requests
 import matplotlib.pyplot as plt
 import time
 import json
+import statsmodels.api as sm
+import seaborn as sns
 from DataRetrival import *
 from GetChannels import getChannelIds
+
 
 format = "%Y-%m-%d"
 
@@ -110,14 +113,17 @@ def addPreviousDaysFeatures(data_frame, amount=1):
 
 
 def getCorrelationOfDataForFeature(data_frame, feature):
-    return data_frame.corr()[[feature]].sort_values(feature)
+    correlations = data_frame.corr()[[feature]].sort_values(feature)
+    predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations[feature][feature_legal]) > 0.6)]
+    return correlations, predicators
 
 
 def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicators, reshape_x, reshape_y):
     new_dataframe = data_frame[[main_feature] + predicators]
     plt.rcParams['figure.figsize'] = [16, 22]
     fig, axes = plt.subplots(nrows=reshape_x, ncols=reshape_y, sharey=True)
-    arr = np.array(predicators).reshape(reshape_x, reshape_y)
+    #arr = np.array(predicators).reshape(reshape_x, reshape_y)
+    arr = np.array(predicators)
     for row, col_arr in enumerate(arr):
         for col, feature in enumerate(col_arr):
             print("**df2[feature] is: {}\n{}".format(feature, new_dataframe[feature]))
@@ -127,3 +133,12 @@ def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicator
             else:
                 axes[row, col].set(xlabel=feature)
     plt.show()
+
+
+def createHeatMap(data_frame, features=[]):
+    data_frame_features = list(data_frame) if features == [] else features
+    data_frame_selected = data_frame[data_frame_features]
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(data_frame_selected.corr(), annot=True, cmap=plt.cm.Blues)
+    plt.show()
+
