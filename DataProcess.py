@@ -122,8 +122,8 @@ def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicator
     new_dataframe = data_frame[[main_feature] + predicators]
     plt.rcParams['figure.figsize'] = [16, 22]
     fig, axes = plt.subplots(nrows=reshape_x, ncols=reshape_y, sharey=True)
-    #arr = np.array(predicators).reshape(reshape_x, reshape_y)
-    arr = np.array(predicators)
+    arr = np.array(predicators).reshape(reshape_x-1)
+   # arr = np.array(predicators)
     for row, col_arr in enumerate(arr):
         for col, feature in enumerate(col_arr):
             print("**df2[feature] is: {}\n{}".format(feature, new_dataframe[feature]))
