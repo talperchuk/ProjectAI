@@ -10,7 +10,9 @@ import statsmodels.api as sm
 import seaborn as sns
 from DataRetrival import *
 from GetChannels import getChannelIds
-
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, median_absolute_error
 
 format = "%Y-%m-%d"
 
@@ -115,6 +117,7 @@ def addPreviousDaysFeatures(data_frame, amount=1):
 def getCorrelationOfDataForFeature(data_frame, feature):
     correlations = data_frame.corr()[[feature]].sort_values(feature)
     predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations[feature][feature_legal]) > 0.6)]
+    predicators.remove('TD')
     return correlations, predicators
 
 
@@ -143,3 +146,43 @@ def createHeatMap(data_frame, features=[]):
     sns.heatmap(data_frame_selected.corr(), annot=True, cmap=plt.cm.Blues)
     plt.show()
 
+
+def getModelFeatures(data_frame, predictors, feature):
+    x = data_frame[predictors]
+    y = data_frame[feature]
+    x = sm.add_constant(x)
+    alpha = 0.05 # TODO: HYPER PARAM
+
+    model = sm.OLS(y, x, missing='drop').fit()
+    while not model.pvalues.empty:
+        p_values = model.pvalues
+        max_index = p_values.idxmax()
+        if p_values[max_index] > alpha:
+            x = x.drop(max_index, axis=1)
+        else:
+            break
+        model = sm.OLS(y, x, missing='drop').fit()
+    print('*****x:')
+    print(x)
+    print('*****x:')
+    print(type(x))
+    x = x if 'const' not in x else x.drop('const', axis=1)
+    return model, x, y
+
+def predict(x, y):
+    test_size = 0.2 # TODO: HYPER PARAM
+    random_state = 12 # TODO: HYPER PARAM
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
+
+    regressor = LinearRegression()
+    x_train.fillna(x_train.mean(), inplace=True)
+    x_test.fillna(x_test.mean(), inplace=True)
+    y_train.fillna(y_train.mean(), inplace=True)
+    y_test.fillna(y_test.mean(), inplace=True)
+    regressor.fit(x_train, y_train)
+
+    prediction = regressor.predict(x_test)
+    print("prediction: {}".format(prediction))
+    print("The Explained Variance: %.2f" % regressor.score(x_test, y_test))
+    print("The Mean Absolute Error: %.2f degrees celsius" % mean_absolute_error(y_test, prediction))
+    print("The Median Absolute Error: %.2f degrees celsius" % median_absolute_error(y_test, prediction))
