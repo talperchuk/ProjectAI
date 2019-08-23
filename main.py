@@ -60,7 +60,7 @@ if __name__ == '__main__':
     #print(type(datafs))
     print(str(datafs))
     #heatmap
-"""
+    """
     createHeatMap(datafs)
 
     print("*******Extended features******")
@@ -95,13 +95,14 @@ if __name__ == '__main__':
     plt.title('Distribution of TDmin')
     plt.xlabel('TDmin')
     plt.show()
-"""
+    """
 
-#try to classify.
-addPreviousDaysFeatures(datafs, 4)
-print("**corr**")
-corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
+    #try to classify.
+    addPreviousDaysFeatures(datafs, 4)
+    print("**corr**")
+    corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
 
-predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
-new_dataframe = datafs[['TD'] + pred]
-createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', predicators, len(pred), 1)
+    #predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
+    new_dataframe = datafs[['TD'] + pred]
+    #createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', predicators, len(pred), 1)
+    createHeatMap(new_dataframe)

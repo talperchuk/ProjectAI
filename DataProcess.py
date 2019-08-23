@@ -12,9 +12,10 @@ from DataRetrival import *
 from GetChannels import getChannelIds
 
 
+##########Consts & Hyper parameters###############
 format = "%Y-%m-%d"
-
 directions = ['North', 'North-West', 'West', 'South-West', 'South', 'South-East', 'East', 'North-East']
+alpha = 0.05
 
 def setWDForOHE(df):
     wd_feature = df.WD.tolist()
@@ -115,6 +116,7 @@ def addPreviousDaysFeatures(data_frame, amount=1):
 def getCorrelationOfDataForFeature(data_frame, feature):
     correlations = data_frame.corr()[[feature]].sort_values(feature)
     predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations[feature][feature_legal]) > 0.6)]
+    predicators.remove(feature)
     return correlations, predicators
 
 
@@ -141,5 +143,3 @@ def createHeatMap(data_frame, features=[]):
     plt.figure(figsize=(12, 10))
     sns.heatmap(data_frame_selected.corr(), annot=True, cmap=plt.cm.Blues)
     plt.show()
-
-#lksdfjn
