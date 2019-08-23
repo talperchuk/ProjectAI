@@ -132,6 +132,7 @@ def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicator
                 axes[row, col].set(xlabel=feature, ylabel=main_feature)
             else:
                 axes[row, col].set(xlabel=feature)
+    # testing this function for failure.
     plt.show()
 
 
