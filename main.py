@@ -38,9 +38,9 @@ def tests():
 
 if __name__ == '__main__':
     #getStationDailyData(43, file_name="tec_")
-    #getStationMonthlyData(43, file_name="aug")
+    #getStationMonthlyData(36, file_name="july")
     #getStationDailyDataForDate(43, year=2018, month=12, day=23, file_name="day")
-    #getStationMonthlyDataForMonth(43, year=2019, month=7, file_name="july")
+    getStationMonthlyDataForMonth(36, year=2019, month=7, file_name="yotvata_july")
     #getStationRangeData(36, 2018, 1, 1, 2018, 12, 31, file_name='yotvata')
     #getStations(file_name='all_')
     features = getChannelIds()
@@ -56,14 +56,22 @@ if __name__ == '__main__':
     print("*******channels******")
     #print(channels)
     print("*******dataFrames****")
-    datafs = createDataFrame(file_name='gamla_2018-1-1-2018-12-31.json')
+    datafs = createDataFrame(file_name='yotvata_july_2019-7.json')
     #print(type(datafs))
     print(str(datafs))
+    datafs.to_csv('./data/datafs_before.csv')
 
     features = list(datafs)
     for feature in features:
         for i in range(1, 4):
             addPreviousDaysPerFeature(datafs, feature, i)
+
+    for col in datafs:
+        mean = datafs[col].mean()
+        datafs[col].fillna(mean, inplace=True)
+
+    datafs.to_csv('./data/datafs_after.csv')
+    print(str(datafs))
 
     correlations = datafs.corr()[['TD']].sort_values('TD')
     predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations['TD'][feature_legal]) > 0.6)]
