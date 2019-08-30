@@ -95,7 +95,7 @@ def createDataFrame(file_name):
     returned_df = pd.DataFrame(data_frames_per_day).transpose()
     wd_feature = setWDForOHE(returned_df)
     returned_df = setOHEToDF(returned_df, wd_feature)
-    returned_df.to_csv('./data/df_with_wind_directions.csv')
+    # returned_df.to_csv('./data/df_with_wind_directions.csv')
     return returned_df
 
 
@@ -147,13 +147,15 @@ def createHeatMap(data_frame, features=[]):
     plt.show()
 
 
-def getModelFeatures(data_frame, predictors, feature):
+def getModelBackElimination(data_frame, predictors, feature):
     x = data_frame[predictors]
     y = data_frame[feature]
     x = sm.add_constant(x)
-    alpha = 0.05 # TODO: HYPER PARAM
+    alpha = 0.08 # TODO: HYPER PARAM
 
-    model = sm.OLS(y, x, missing='drop').fit()
+    model = sm.GLS(y, x, missing='drop').fit()
+    print("First model:\n{}".format(model.summary()))
+    i = 0
     while not model.pvalues.empty:
         p_values = model.pvalues
         max_index = p_values.idxmax()
@@ -161,7 +163,10 @@ def getModelFeatures(data_frame, predictors, feature):
             x = x.drop(max_index, axis=1)
         else:
             break
-        model = sm.OLS(y, x, missing='drop').fit()
+        model = sm.GLS(y, x, missing='drop').fit()
+        print("i: {}".format(i))
+        print(model.summary())
+        i += 1
     print('*****x:')
     print(x)
     print('*****x:')
@@ -175,10 +180,10 @@ def predict(x, y):
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
 
     regressor = LinearRegression()
-    x_train.fillna(x_train.mean(), inplace=True)
-    x_test.fillna(x_test.mean(), inplace=True)
-    y_train.fillna(y_train.mean(), inplace=True)
-    y_test.fillna(y_test.mean(), inplace=True)
+    # x_train = x_train.fillna(x_train.mean(), inplace=False)
+    # x_test = x_test.fillna(x_test.mean(), inplace=False)
+    # y_train = y_train.fillna(y_train.mean(), inplace=False)
+    # y_test = y_test.fillna(y_test.mean(), inplace=False)
     regressor.fit(x_train, y_train)
 
     prediction = regressor.predict(x_test)
@@ -186,3 +191,4 @@ def predict(x, y):
     print("The Explained Variance: %.2f" % regressor.score(x_test, y_test))
     print("The Mean Absolute Error: %.2f degrees celsius" % mean_absolute_error(y_test, prediction))
     print("The Median Absolute Error: %.2f degrees celsius" % median_absolute_error(y_test, prediction))
+

@@ -12,6 +12,7 @@
 
 # Generated files
 .idea/**/contentModel.xml
+*.orig
 
 # .iml files
 *.iml
