@@ -56,7 +56,7 @@ if __name__ == '__main__':
     print("*******channels******")
     #print(channels)
     print("*******dataFrames****")
-    datafs = createDataFrame(file_name='yotvata_2016-1-1-2018-12-31.json')
+    datafs = createDataFrame(file_name='yotvata_july_2019-7.json')
     #print(type(datafs))
     #print(str(datafs))
     #heatmap
@@ -98,20 +98,50 @@ if __name__ == '__main__':
     """
 
     # try to classify.
-    addPreviousDaysFeatures(datafs, 6)
+    # addPreviousDaysFeatures(datafs, 6)
     print("**corr**")
-    corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
+    # for col in datafs:
+    #     mean = datafs[col].mean()
+    #     datafs[col].fillna(mean, inplace=True)
+    #
+    # corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
 
     # predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
 
-    new_dataframe = datafs[['TD'] + pred]
-    new_dataframe = new_dataframe.dropna()
-    print('********INFO: {}'.format(new_dataframe.info()))
-    # createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', predicators, len(pred), 1)
-    createHeatMap(new_dataframe)
-    print('********Pred: {}'.format(pred))
-    model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
-    print('********Final summary: {}'.format(model.summary()))
-    predict(x, y)
+#    new_dataframe = datafs[['TD'] + pred]
+
+#    new_dataframe = new_dataframe.dropna()
+#    print('********INFO: {}'.format(new_dataframe.info()))
+#     createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', pred, len(pred), 1)
+#    createHeatMap(new_dataframe)
+#    print('********Pred: {}'.format(pred))
+#    model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
+#    print('********Final summary: {}'.format(model.summary()))
+#    predict(x, y)
+
+    """
     print('********X: {}'.format(x))
     print('********Y: {}'.format(y))
+    """
+
+
+    # Predict addons of multiple days and for changing corr hyper param (4/9/19)
+
+
+    for day_addon in range(29):
+    # try to classify.
+        print('DAY: {}!!!!!!!!'.format(day_addon))
+        addPreviousDaysFeatures(datafs, day_addon)
+        print("**corr**")
+        for col in datafs:
+            mean = datafs[col].mean()
+            datafs[col].fillna(mean, inplace=True)
+
+        for corr_hyper in np.arange(0.1, 1, 0.1):
+            print('################################# {} ##########################'.format(corr_hyper))
+            corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
+            new_dataframe = datafs[['TD'] + pred]
+            model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
+            ('********Final summary: {}'.format(model.summary()))
+            predict(x,y)
+

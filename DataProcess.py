@@ -12,6 +12,8 @@ from DataRetrival import *
 from GetChannels import getChannelIds
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
+from sklearn.svm import SVR
 from sklearn.metrics import mean_absolute_error, median_absolute_error
 
 format = "%Y-%m-%d"
@@ -114,29 +116,35 @@ def addPreviousDaysFeatures(data_frame, amount=1):
             addPreviousDaysPerFeature(data_frame, feature, i)
 
 
-def getCorrelationOfDataForFeature(data_frame, feature):
+def getCorrelationOfDataForFeature(data_frame, feature, corr_hyper_param=0.5):
     correlations = data_frame.corr()[[feature]].sort_values(feature)
-    predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations[feature][feature_legal]) > 0.6)]
+    predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations[feature][feature_legal]) > corr_hyper_param)]
     predicators.remove('TD')
     return correlations, predicators
 
 
 def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicators, reshape_x, reshape_y):
     new_dataframe = data_frame[[main_feature] + predicators]
-    plt.rcParams['figure.figsize'] = [16, 22]
+    plt.rcParams['figure.figsize'] = [35, 100]
     fig, axes = plt.subplots(nrows=reshape_x, ncols=reshape_y, sharey=True)
     #arr = np.array(predicators).reshape(reshape_x, reshape_y)
     arr = np.array(predicators)
     for row, col_arr in enumerate(arr):
         for col, feature in enumerate(col_arr):
+            if reshape_y == 1:
+                axes[row].scatter(new_dataframe[col_arr], new_dataframe[main_feature])
+                axes[row].set(xlabel=col_arr, ylabel=main_feature)
+                break
             print("**df2[feature] is: {}\n{}".format(feature, new_dataframe[feature]))
             axes[row, col].scatter(new_dataframe[feature], new_dataframe[main_feature])
             if col == 0:
                 axes[row, col].set(xlabel=feature, ylabel=main_feature)
+
             else:
                 axes[row, col].set(xlabel=feature)
     # testing this function for failure.
     plt.show()
+    # plt.savefig('plot.png')
 
 
 def createHeatMap(data_frame, features=[]):
@@ -174,21 +182,46 @@ def getModelBackElimination(data_frame, predictors, feature):
     x = x if 'const' not in x else x.drop('const', axis=1)
     return model, x, y
 
+
 def predict(x, y):
     test_size = 0.2 # TODO: HYPER PARAM
     random_state = 12 # TODO: HYPER PARAM
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
 
-    regressor = LinearRegression()
+
     # x_train = x_train.fillna(x_train.mean(), inplace=False)
     # x_test = x_test.fillna(x_test.mean(), inplace=False)
     # y_train = y_train.fillna(y_train.mean(), inplace=False)
     # y_test = y_test.fillna(y_test.mean(), inplace=False)
-    regressor.fit(x_train, y_train)
 
-    prediction = regressor.predict(x_test)
+    #Roll train
+    y_train = np.roll(y_train, -1)
+    y_test = np.roll(y_test, -1)
+
+    linear_regressor = LinearRegression()
+    linear_regressor.fit(x_train, y_train)
+    prediction = linear_regressor.predict(x_test)
+    print('#####Linear####')
     print("prediction: {}".format(prediction))
-    print("The Explained Variance: %.2f" % regressor.score(x_test, y_test))
+    print("The Explained Variance: %.2f" % linear_regressor.score(x_test, y_test))
     print("The Mean Absolute Error: %.2f degrees celsius" % mean_absolute_error(y_test, prediction))
     print("The Median Absolute Error: %.2f degrees celsius" % median_absolute_error(y_test, prediction))
+
+    ridge_regressor = Ridge()
+    ridge_regressor.fit(x_train, y_train)
+    prediction_ridge = ridge_regressor.predict(x_test)
+    print('#####Ridge####')
+    print("Ridge prediction: {}".format(prediction_ridge))
+    print("The Explained Variance: %.2f" % ridge_regressor.score(x_test, y_test))
+    print("The Mean Absolute Error: %.2f degrees celsius" % mean_absolute_error(y_test, prediction_ridge))
+    print("The Median Absolute Error: %.2f degrees celsius" % median_absolute_error(y_test, prediction_ridge))
+
+    svr_regressor = SVR(kernel='poly', C=1e3, degree=2)
+    svr_regressor.fit(x_train, y_train)
+    prediction_svr = svr_regressor.predict(x_test)
+    print('#####SVR####')
+    print("Ridge prediction: {}".format(prediction_ridge))
+    print("The Explained Variance: %.2f" % ridge_regressor.score(x_test, y_test))
+    print("The Mean Absolute Error: %.2f degrees celsius" % mean_absolute_error(y_test, prediction_ridge))
+    print("The Median Absolute Error: %.2f degrees celsius" % median_absolute_error(y_test, prediction_ridge))
 
