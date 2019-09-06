@@ -173,12 +173,12 @@ def getModelBackElimination(data_frame, predictors, feature):
             break
         model = sm.GLS(y, x, missing='drop').fit()
         print("i: {}".format(i))
-        print(model.summary())
+        #print(model.summary())
         i += 1
-    print('*****x:')
-    print(x)
-    print('*****x:')
-    print(type(x))
+    #print('*****x:')
+    #print(x)
+    #print('*****x:')
+    #print(type(x))
     x = x if 'const' not in x else x.drop('const', axis=1)
     return model, x, y
 

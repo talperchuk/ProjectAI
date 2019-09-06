@@ -130,17 +130,18 @@ if __name__ == '__main__':
 
     for day_addon in range(29):
     # try to classify.
-        print('DAY: {}!!!!!!!!'.format(day_addon))
-        addPreviousDaysFeatures(datafs, day_addon)
+        print('DAY: {}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'.format(day_addon))
+        tmp_datafs = datafs.copy(deep=True)
+        addPreviousDaysFeatures(tmp_datafs, day_addon)
         print("**corr**")
-        for col in datafs:
-            mean = datafs[col].mean()
-            datafs[col].fillna(mean, inplace=True)
+        for col in tmp_datafs:
+            mean = tmp_datafs[col].mean()
+            tmp_datafs[col].fillna(mean, inplace=True)
 
         for corr_hyper in np.arange(0.1, 1, 0.1):
             print('################################# {} ##########################'.format(corr_hyper))
-            corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
-            new_dataframe = datafs[['TD'] + pred]
+            corr, pred = getCorrelationOfDataForFeature(tmp_datafs, 'TD')
+            new_dataframe = tmp_datafs[['TD'] + pred]
             model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
             ('********Final summary: {}'.format(model.summary()))
             predict(x,y)
