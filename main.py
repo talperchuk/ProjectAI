@@ -1,6 +1,7 @@
 
 from pandas.io.json import json_normalize
 from DataProcess import *
+from LocationBasedDataProcess import *
 
 def tests():
     # getDailyData(file_name='dailyTarget.json')
@@ -37,12 +38,13 @@ def tests():
 
 
 if __name__ == '__main__':
-    #getStationDailyData(43, file_name="tec_")
+    #getStationDailyData(43, file_name="tec")
     #getStationMonthlyData(43, file_name="aug")
     #getStationDailyDataForDate(43, year=2018, month=12, day=23, file_name="day")
-    #getStationMonthlyDataForMonth(43, year=2019, month=7, file_name="july")
+    #getStationMonthlyDataForMonth(43, year=2019, month=8, file_name="")
     #getStationRangeData(36, 2016, 1, 1, 2018, 12, 31, file_name='yotvata')
     #getStations(file_name='all_')
+    locations_main_runner()
     features = getChannelIds()
     print(features.keys())
     print(list(features))
@@ -143,5 +145,5 @@ if __name__ == '__main__':
             new_dataframe = datafs[['TD'] + pred]
             model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
             ('********Final summary: {}'.format(model.summary()))
-            predict(x,y)
+            predict(x, y)
 

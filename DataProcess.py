@@ -86,7 +86,7 @@ def createDataFrame(file_name):
     measurement_data_frame = pd.DataFrame()
     data_frames_per_day = {}
     for measurement in measurements:
-        measurement_time = time.strptime(measurement.split("T")[0], format)
+        measurement_time = time.strftime(format, time.strptime(measurement.split("T")[0], format))
         if measurement_time not in data_frames_per_day:
             measurement_data_frame = pd.DataFrame()
         df = pd.DataFrame(measurements[measurement], columns=features_list).set_index('datetime')

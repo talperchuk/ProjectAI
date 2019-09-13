@@ -16,3 +16,13 @@
 
 # .iml files
 *.iml
+
+# DS_STORE
+*.DS_Store
+**/.DS_Store
+
+#pycache
+**/__pycache__
+
+#TOO_BIG FILES
+data/*_TOO_BUG.json
