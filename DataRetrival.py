@@ -70,14 +70,16 @@ def getStationMonthlyDataForMonth(station, year, month, channel=-1, file_name=""
     return response.json()
 
 
-def getStationRangeData(station, start_year, start_month, start_day, end_year, end_month, end_name, channel=-1, file_name=""):
-    response = requests.get('https://api.ims.gov.il/v1/envista/stations/{}/data?from={}/{}/{}&to={}/{}/{}'.format(station, start_year, start_month, start_day, end_year, end_month, end_name),
+def getStationRangeData(station, start_year, start_month, start_day, end_year, end_month, end_day, channel=-1, file_name=""):
+    response = requests.get('https://api.ims.gov.il/v1/envista/stations/{}/data?from={}/{}/{}&to={}/{}/{}'.format(station, start_year, start_month, start_day, end_year, end_month, end_day),
                             headers={'Authorization': apiToken}) if channel == -1 else requests.get(
-        'https://api.ims.gov.il/v1/envista/stations/{}/data/{}?from={}/{}/{}&to={}/{}/{}'.format(station, channel, start_year, start_month, start_day, end_year, end_month, end_name),
+        'https://api.ims.gov.il/v1/envista/stations/{}/data/{}?from={}/{}/{}&to={}/{}/{}'.format(station, channel, start_year, start_month, start_day, end_year, end_month, end_day),
         headers={'Authorization': apiToken})
-
-    path = "./data/{}".format(station) if channel == -1 else "./data/{}/channel{}".format(station, channel)
-    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
-    with open("{}/{}_{}-{}-{}-{}-{}-{}.json".format(path, file_name, start_year, start_month, start_day, end_year, end_month, end_name), 'w') as jsonTarget:
-        json.dump(response.json(), jsonTarget)
-    return response.json()
+    if 200 <= response.status_code <= 299:
+        path = "./data/{}".format(station) if channel == -1 else "./data/{}/channel{}".format(station, channel)
+        pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+        with open("{}/{}_{}-{}-{}-{}-{}-{}.json".format(path, file_name, start_year, start_month, start_day, end_year, end_month, end_day), 'w') as jsonTarget:
+            json.dump(response.json(), jsonTarget)
+        return response.json()
+    else:
+        print('Response requestr failed.')

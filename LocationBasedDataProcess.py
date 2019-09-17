@@ -18,12 +18,12 @@ def calcEuclidianDistance(location1, location2):
     return sum(distances_list) ** 0.5
 
 
-def getClosestKStationsToLocation(location, k=5, station=-1):
+def getClosestKStationsToLocation(location=None, k=5, station=-1):
     stations_locations = getStationsLocations()
     base_location = location if station == -1 else stations_locations[station]
-    distances = {station_id: calcEuclidianDistance(base_location, stations_locations[station_id]) for station_id in stations_locations if station_id != station and base_location != stations_locations[station_id]}
+    distances = {station_id: calcEuclidianDistance(base_location, stations_locations[station_id]) for station_id in stations_locations}
     ordered_distances = OrderedDict(sorted(distances.items(), key=lambda t: t[1]))
-    k_closest_locations = list(zip(ordered_distances.keys(), ordered_distances.values()))[:k]
+    k_closest_locations = list(zip(ordered_distances.keys(), ordered_distances.values()))[:k+1]
     return dict(k_closest_locations)
 
 
@@ -38,7 +38,7 @@ def mergeKStationsDataSets(datasets={}):
     return merge_dataset
 
 
-def expr_1():
+def prep_1():
     """
     Create data sets for the closest stations to the technion.
     """
@@ -58,7 +58,7 @@ def expr_1():
     return True
 
 
-def expr_2():
+def prep_2():
     '''
     Get dataframe of technion closest 10 locations (without the technion itself)
     ----AFTER: Changed get closest to include the base station itself due to the fact that it is needed.
@@ -72,31 +72,41 @@ def expr_2():
     merged.to_csv('./data/merged.csv')
 
 
-def expr_3():
+def prep_3():
     """
     check for the technion what are the best k stations around it that improve the results.
     """
-    # create technion data frame
-    file_name = str(43) + '/_2019-8.json'
-    print(file_name)
-    tec_dataframe = createDataFrame(file_name)
-    tec_dataframe.to_csv('./data/{}/dataset_2019-8.csv'.format(43))
-
-    # Get the locations of all stations.
-    locations = getStationsLocations()
-
     #Starts with the technion itself, and then adding one station at a time.
     merged_datasets = []
     for k in range(11):
+        print('k={}'.format(k))
         closest_ids = getClosestKStationsToLocation(station=43, k=k).keys()  # using station
-        datasets={43: tec_dataframe}
+        datasets={}
         for station_id in closest_ids:
             dfcolumns = pd.read_csv('./data/{}/dataset_2019-8.csv'.format(station_id), nrows=1)
             datasets[station_id] = pd.read_csv('./data/{}/dataset_2019-8.csv'.format(station_id), index_col=[0],
                                                usecols=list(range(len(dfcolumns.columns))))
+        merged = mergeKStationsDataSets(datasets)
+        merged_datasets.append(merged)
+        merged.to_csv('./data/43/merged_{}.csv'.format(k))
 
-
-
+def create_data_for_all_stations():
+    stations = getStationsLocations()
+    not_in_st = [35, 89, 99, 257, 265, 270]
+    data = {}
+    for station in stations.keys():
+        if station not in not_in_st:
+            file_name = str(station) + '/_2019-2-15-2019-6-15.json'
+            print(file_name)
+            getStationRangeData(station, 2019, 2,15,2019,6,15)
+            data[station] = createDataFrame(file_name)
+            #dfcolumns = pd.read_csv('./data/{}/dataset_2019-4-1-2019-6-20.csv'.format(station), nrows=1)
+            #data[station] = pd.read_csv('./data/{}/dataset_2019-4-1-2019-6-20.csv'.format(station), index_col=[0],
+            #                                   usecols=list(range(len(dfcolumns.columns))))
+            # exported data_set for faster loading.
+            data[station].to_csv('./data/{}/dataset_2019-2-15-2019-6-15.csv'.format(station))
+    merged = mergeKStationsDataSets(data)
+    merged.to_csv('./data/merged_all_2019-2-15-2019-6-15.csv')
 
 
 
@@ -105,6 +115,11 @@ def locations_main_runner():
     Will be the runner for all experiments functions
     """
     #data = getStationsData()
-    expr_1()
-    expr_2()
+    # prep_1()
+    # prep_2()
+    # prep_3()
+    create_data_for_all_stations()
     return True
+
+if __name__ == '__main__':
+    locations_main_runner()

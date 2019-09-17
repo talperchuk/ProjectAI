@@ -44,43 +44,41 @@ if __name__ == '__main__':
     #getStationMonthlyDataForMonth(43, year=2019, month=8, file_name="")
     #getStationRangeData(36, 2016, 1, 1, 2018, 12, 31, file_name='yotvata')
     #getStations(file_name='all_')
+    # # Running Location based Tests. # #
     locations_main_runner()
-    features = getChannelIds()
-    print(features.keys())
-    print(list(features))
-    print(features.values())
+    # # Get the channels Ids based on one example # #
+    #features = getChannelIds()
+
     #id, times, channels, msrmnts = getChannelsDataFromJSON(file_name='july_2019-7.json')
     #print(features)
-    print("*******id******")
-    #print(id)
-    print("*******times******")
-    #print(times)
-    print("*******channels******")
-    #print(channels)
-    print("*******dataFrames****")
-    datafs = createDataFrame(file_name='yotvata_july_2019-7.json')
-    #print(type(datafs))
-    #print(str(datafs))
-    #heatmap
     """
+    
+    # # Create data frame from a json file. # #
+    datafs = createDataFrame(file_name='yotvata_july_2019-7.json')
+
+    # # Create heatmap # #
     createHeatMap(datafs)
 
+    # # Add previous days dat as features # #
     print("*******Extended features******")
-    predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
     addPreviousDaysFeatures(datafs, 4)
-    # calc correlation
-    print(getCorrelationOfDataForFeature(datafs, 'TD'))
-    #creating correlation graphs
-    createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', predicators, 6, 3)
 
-    #tests()
-    #### deriving the features
+    # #calc correlation of each feature with respect to main feature.
+    # #calc all features above abs of corr_hyper_param=0.5
+    #correlation, predictors = getCorrelationOfDataForFeature(datafs, 'TD', corr_hyper_param=0.5)
+
+
+    # tests()
+    # ### deriving the features
+    # # using small dataset for FIRST tries and checks.
     tmp = datafs[['TDmax', 'TDmin', 'TD']]
     print("*******dataFramesInfo****")
     print(tmp.info())
+    # # calc the spread based on IQR.
+    # # Respect to the part of spread in the article.
     spread = datafs.describe().transpose()
     IQR = spread['75%'] - spread['25%']
-    spread['outliers'] = (spread['min'] < (spread['25%']-(3*IQR))) | (spread['max'] > (spread['75%']+3*IQR))
+    spread['outliers'] = (spread['min'] < (spread['25%']-(3*IQR))) | (spread['max'] > (spread['75%']+3*IQR)) # TODO: add to data process
     print('*******dataFramesSpread****')
     print(spread)
     print(spread.info())
@@ -98,6 +96,7 @@ if __name__ == '__main__':
     plt.xlabel('TDmin')
     plt.show()
     """
+    """
 
     # try to classify.
     # addPreviousDaysFeatures(datafs, 6)
@@ -106,30 +105,28 @@ if __name__ == '__main__':
     #     mean = datafs[col].mean()
     #     datafs[col].fillna(mean, inplace=True)
     #
-    # corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
-
-    # predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
-
-#    new_dataframe = datafs[['TD'] + pred]
-
-#    new_dataframe = new_dataframe.dropna()
-#    print('********INFO: {}'.format(new_dataframe.info()))
-#     createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', pred, len(pred), 1)
-#    createHeatMap(new_dataframe)
-#    print('********Pred: {}'.format(pred))
-#    model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
-#    print('********Final summary: {}'.format(model.summary()))
-#    predict(x, y)
-
     """
+    """
+    # #First try of predict and fit (manually)
+    corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
+
+    predicators = ['NIP', 'NIP_1', 'NIP_2', 'Grad', 'Grad_1', 'Grad_2', 'Grad_3', 'TDmax', 'TDmax_1', 'TDmax_2', 'TDmax_3', 'TDmin', 'TDmin_1', 'TDmin_2', 'TDmin_3', 'TD_1', 'TD_2', 'TD_3']
+
+    new_dataframe = datafs[['TD'] + pred]
+
+    new_dataframe = new_dataframe.dropna()
+    print('********INFO: {}'.format(new_dataframe.info()))
+    createRelationOfFeaturesToFeatureGraphs(datafs, 'TD', pred, len(pred), 1)
+    createHeatMap(new_dataframe)
+    print('********Pred: {}'.format(pred))
+    model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
+    print('********Final summary: {}'.format(model.summary()))
+    predict(x, y)
+
     print('********X: {}'.format(x))
     print('********Y: {}'.format(y))
-    """
-
 
     # Predict addons of multiple days and for changing corr hyper param (4/9/19)
-
-
     for day_addon in range(29):
     # try to classify.
         print('DAY: {}!!!!!!!!'.format(day_addon))
@@ -146,4 +143,4 @@ if __name__ == '__main__':
             model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
             ('********Final summary: {}'.format(model.summary()))
             predict(x, y)
-
+    """
