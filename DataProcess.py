@@ -21,6 +21,8 @@ format = "%Y-%m-%d"
 directions = ['North', 'North-West', 'West', 'South-West', 'South', 'South-East', 'East', 'North-East']
 
 def setWDForOHE(df):
+    if 'WD' not in df.columns:
+        return []
     wd_feature = df.WD.tolist()
     for i in range(len(wd_feature)):
         if wd_feature[i] == 0 or wd_feature[i] == 360:
@@ -78,6 +80,17 @@ def getChannelsDataFromJSON(file_name='dailyTarget.json'):
         measurments_summary[measurment['datetime']] = measurment_channels
     return station_id, measurment_times, measurment_channels, measurments_summary
 
+def preparedDF(copy_df, missing_threshold):
+    #copy_df.drop(labels='Unnamed: 0', axis=1, inplace=True)
+    col_list = list(copy_df.columns)
+    for column in col_list:
+        missingCount = copy_df[column].isnull().sum()
+        overallCount = len(copy_df[column])
+        if (missingCount / overallCount) > missing_threshold:
+            copy_df.drop(columns=column, axis=1, inplace=True)
+        else:
+            copy_df[column].fillna(copy_df[column].mean(), inplace=True)
+    return copy_df
 
 def createDataFrame(file_name):
     features_list = list(getChannelIds())
@@ -95,7 +108,10 @@ def createDataFrame(file_name):
     for frame in data_frames_per_day:
         data_frames_per_day[frame] = data_frames_per_day[frame].mean(axis=0)
     returned_df = pd.DataFrame(data_frames_per_day).transpose()
+    returned_df = preparedDF(returned_df, 0.25)
     wd_feature = setWDForOHE(returned_df)
+    if not wd_feature:
+        return returned_df
     returned_df = setOHEToDF(returned_df, wd_feature)
     # returned_df.to_csv('./data/df_with_wind_directions.csv')
     return returned_df
@@ -119,7 +135,7 @@ def addPreviousDaysFeatures(data_frame, amount=1):
 def getCorrelationOfDataForFeature(data_frame, feature, corr_hyper_param=0.5):
     correlations = data_frame.corr()[[feature]].sort_values(feature)
     predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations[feature][feature_legal]) > corr_hyper_param)]
-    predicators.remove('TD')
+    predicators.remove(feature)
     return correlations, predicators
 
 

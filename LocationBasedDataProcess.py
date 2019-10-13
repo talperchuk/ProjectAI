@@ -95,18 +95,18 @@ def create_data_for_all_stations():
     not_in_st = [35, 89, 99, 257, 265, 270]
     data = {}
     for station in stations.keys():
-        if station not in not_in_st:
-            file_name = str(station) + '/_2019-2-15-2019-6-15.json'
+        if station not in not_in_st and station <= -1: # change the zero if needed to load stations after failure.
+            dfcolumns = pd.read_csv('./data/{}/dataset_2016-1-1-2019-10-1.csv'.format(station), nrows=1)
+            data[station] = pd.read_csv('./data/{}/dataset_2016-1-1-2019-10-1.csv'.format(station), index_col=[0], usecols=list(range(len(dfcolumns.columns))))
+        if station not in not_in_st and station > -1:
+            file_name = str(station) + '/_2016-1-1-2019-10-1.json'
             print(file_name)
-            getStationRangeData(station, 2019, 2,15,2019,6,15)
+            getStationRangeData(station, 2016, 1, 1, 2019, 10, 1) # # get data from server.
             data[station] = createDataFrame(file_name)
-            #dfcolumns = pd.read_csv('./data/{}/dataset_2019-4-1-2019-6-20.csv'.format(station), nrows=1)
-            #data[station] = pd.read_csv('./data/{}/dataset_2019-4-1-2019-6-20.csv'.format(station), index_col=[0],
-            #                                   usecols=list(range(len(dfcolumns.columns))))
             # exported data_set for faster loading.
-            data[station].to_csv('./data/{}/dataset_2019-2-15-2019-6-15.csv'.format(station))
+            data[station].to_csv('./data/{}/dataset_2016-1-1-2019-10-1.csv'.format(station))
     merged = mergeKStationsDataSets(data)
-    merged.to_csv('./data/merged_all_2019-2-15-2019-6-15.csv')
+    merged.to_csv('./data/merged_all_2016-1-1-2019-10-1.csv')
 
 
 
