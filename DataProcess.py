@@ -58,6 +58,7 @@ def setOHEToDF(df, wd_feature):
     df_after_ohe = pd.concat([res, complement_direction_df], axis='columns')
     return df_after_ohe
 
+
 def getChannelsDataFromJSON(file_name='dailyTarget.json'):
     with open('./data/' + file_name, 'r') as f:
         data = json.load(f)
@@ -80,6 +81,7 @@ def getChannelsDataFromJSON(file_name='dailyTarget.json'):
         measurments_summary[measurment['datetime']] = measurment_channels
     return station_id, measurment_times, measurment_channels, measurments_summary
 
+
 def preparedDF(copy_df, missing_threshold):
     #copy_df.drop(labels='Unnamed: 0', axis=1, inplace=True)
     col_list = list(copy_df.columns)
@@ -91,6 +93,7 @@ def preparedDF(copy_df, missing_threshold):
         else:
             copy_df[column].fillna(copy_df[column].mean(), inplace=True)
     return copy_df
+
 
 def createDataFrame(file_name):
     features_list = list(getChannelIds())
@@ -108,12 +111,13 @@ def createDataFrame(file_name):
     for frame in data_frames_per_day:
         data_frames_per_day[frame] = data_frames_per_day[frame].mean(axis=0)
     returned_df = pd.DataFrame(data_frames_per_day).transpose()
+    #returned_df.to_csv('./data/df_without_wind_directions.csv')
     returned_df = preparedDF(returned_df, 0.25)
     wd_feature = setWDForOHE(returned_df)
     if not wd_feature:
         return returned_df
     returned_df = setOHEToDF(returned_df, wd_feature)
-    # returned_df.to_csv('./data/df_with_wind_directions.csv')
+    #returned_df.to_csv('./data/df_with_wind_directions.csv')
     return returned_df
 
 
@@ -133,6 +137,14 @@ def addPreviousDaysFeatures(data_frame, amount=1):
 
 
 def getCorrelationOfDataForFeature(data_frame, feature, corr_hyper_param=0.5):
+    """
+    calc correlation of each feature with respect to main feature.
+    calc all features above abs of corr_hyper_param=0.5
+    :param data_frame:
+    :param feature:
+    :param corr_hyper_param:
+    :return:
+    """
     correlations = data_frame.corr()[[feature]].sort_values(feature)
     predicators = [feature_legal for feature_legal in correlations.index if (abs(correlations[feature][feature_legal]) > corr_hyper_param)]
     predicators.remove(feature)
@@ -166,7 +178,7 @@ def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicator
 def createHeatMap(data_frame, features=[]):
     data_frame_features = list(data_frame) if features == [] else features
     data_frame_selected = data_frame[data_frame_features]
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(100, 100))
     sns.heatmap(data_frame_selected.corr(), annot=True, cmap=plt.cm.Blues)
     plt.show()
 
@@ -204,12 +216,6 @@ def predict(x, y):
     random_state = 12 # TODO: HYPER PARAM
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
 
-
-    # x_train = x_train.fillna(x_train.mean(), inplace=False)
-    # x_test = x_test.fillna(x_test.mean(), inplace=False)
-    # y_train = y_train.fillna(y_train.mean(), inplace=False)
-    # y_test = y_test.fillna(y_test.mean(), inplace=False)
-
     #Roll train
     y_train = np.roll(y_train, -1)
     y_test = np.roll(y_test, -1)
@@ -241,3 +247,35 @@ def predict(x, y):
     print("The Mean Absolute Error: %.2f degrees celsius" % mean_absolute_error(y_test, prediction_ridge))
     print("The Median Absolute Error: %.2f degrees celsius" % median_absolute_error(y_test, prediction_ridge))
 
+def expr_1():
+    """
+    Create heatmap for technion station alone and for all stations together - for technion and merged.
+    """
+    all_stations_dataframe = pd.read_csv('./data/merged_all_2016-1-1-2019-10-1.csv')
+    technion_station_dataframe = pd.read_csv('./data/43/dataset_2016-1-1-2019-10-1.csv')
+    addPreviousDaysFeatures(technion_station_dataframe, 5)
+    createHeatMap(all_stations_dataframe)
+    createHeatMap(technion_station_dataframe)
+
+def expr_2():
+    """
+    Create correlation of features in respect to specific feature - for technion and merged.
+    """
+    technion_station_dataframe = pd.read_csv('./data/43/dataset_2016-1-1-2019-10-1.csv')
+    all_stations_dataframe = pd.read_csv('./data/merged_all_2016-1-1-2019-10-1.csv')
+
+    correlation_technion, predictors_technion = getCorrelationOfDataForFeature(technion_station_dataframe, 'TD', corr_hyper_param=0.5)
+    correlation_merged, predictors_merged = getCorrelationOfDataForFeature(all_stations_dataframe, 'TD_43',corr_hyper_param=0.5)
+
+    new_dataframe_technion = technion_station_dataframe[['TD'] + predictors_technion]
+    new_dataframe_technion = new_dataframe_technion.dropna()
+    new_dataframe_merged = all_stations_dataframe[['TD'] + predictors_merged]
+    new_dataframe_merged = new_dataframe_merged.dropna()
+
+    createRelationOfFeaturesToFeatureGraphs(new_dataframe_technion, 'TD', predictors_technion, len(predictors_technion), 1)
+    createRelationOfFeaturesToFeatureGraphs(new_dataframe_merged, 'TD_43', predictors_merged, len(predictors_merged), 1)
+
+
+if __name__ == '__main__':
+    expr_1()
+    expr_2()
