@@ -2,12 +2,20 @@ from DataProcess import *
 from collections import OrderedDict
 
 def getStationsData(stations_file_name='stations_data.json'):
+    """
+    Reads stations information file obtained from API.
+    :return: Stations information.
+    """
     with open('./data/' + stations_file_name, 'r') as stations_file:
         data = json.load(stations_file)
     return data
 
 
 def getStationsLocations():
+    """
+    Finds station location for all stations.
+    :return: list of locations.
+    """
     data = getStationsData()
     locations = {station['stationId']:[station['location']['latitude'], station['location']['longitude']] for station in data if station['active'] is True and station['location']['latitude'] is not None and station['location']['longitude'] is not None}
     return locations
@@ -19,6 +27,13 @@ def calcEuclidianDistance(location1, location2):
 
 
 def getClosestKStationsToLocation(location=None, k=5, station=-1):
+    """
+    Calculates what are the k closest stations to specific location
+    :param location: Coordination.
+    :param k: Number of stations to search for.
+    :param station: -1 if location is wanted, else station id numer.
+    :return: Ordered dictionary of station_id as key and distance as value.
+    """
     stations_locations = getStationsLocations()
     base_location = location if station == -1 else stations_locations[station]
     distances = {station_id: calcEuclidianDistance(base_location, stations_locations[station_id]) for station_id in stations_locations}
@@ -28,6 +43,11 @@ def getClosestKStationsToLocation(location=None, k=5, station=-1):
 
 
 def mergeKStationsDataSets(datasets={}):
+    """
+    Merging datasets of several stations into one dataset.
+    :param datasets: Dictionary with station_id as key and dataset as value.
+    :return: Merged dataset, where features are followd by _<station_id>
+    """
     #Change datasets col names
     datasets_copy = {station_id: dataset.copy(deep=True) for station_id, dataset in datasets.items()}
     items = datasets_copy.items()
@@ -38,23 +58,21 @@ def mergeKStationsDataSets(datasets={}):
     return merge_dataset
 
 
-def prep_1():
+def prep_1(file_name_dates):
     """
     Create data sets for the closest stations to the technion.
     """
     # Get technion 10 closest stations data.
-    #technion_10_neighbors = [42, 41, 44, 78, 67, 186, 45, 343, 205, 16]
-    # for station in technion_10_neighbors:
-    #     getStationMonthlyDataForMonth(station=station, month=8, year=2019)
+
     locations = getStationsLocations()
     closest = getClosestKStationsToLocation(locations[43], k=10) # using location
     data_frames = {}
     for station in closest:
-        file_name = str(station) + '/_2019-8.json'
+        file_name = str(station) + '/' + file_name_dates + '.json'
         print(file_name)
         data_frames[station] = createDataFrame(file_name)
         #exported data_set for faster loading.
-        data_frames[station].to_csv('./data/{}/dataset_2019-8.csv'.format(station))
+        data_frames[station].to_csv('./data/{}/dataset_{}.csv'.format(station, file_name_dates))
     return True
 
 
@@ -115,7 +133,7 @@ def locations_main_runner():
     Will be the runner for all experiments functions
     """
     #data = getStationsData()
-    # prep_1()
+    # prep_1('_2019-8')
     # prep_2()
     # prep_3()
     create_data_for_all_stations()

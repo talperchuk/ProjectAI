@@ -15,11 +15,10 @@ from statistics import mean
 import sklearn.metrics
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
-    start = str(datetime.now())
-    print(start)
-    features1 = getChannelIds()
-    datafs = pd.read_csv("./data/merged_all_2016-1-1-2019-10-1.csv")
+
+def find_features_runner(raw_data_file_name):
+
+    datafs = pd.read_csv(raw_data_file_name)
 
     ###########################Global Parameters###########################
     missing_threshold = 0.25
@@ -27,23 +26,20 @@ if __name__ == '__main__':
     corr_hyper_params = np.array(list(np.arange(0, 0.5, 0.1)))
     select_k_best = [5, 20, 40, 60, 80, 100]
 
-    checked_station = 36
-
-    #five_days_df = datafs.head()
-    copy_df = datafs.copy(deep=True)#five_days_df.copy(deep=True)
+    ###########################Chosen Station###########################
+    checked_station = 43
 
     ######Add this if reading from "merged" files#####################
     ######Drop missing columns with thrashold over missing_threshold value#######
-    copy_df.drop(labels='Unnamed: 0', axis=1, inplace=True)
+    datafs.drop(labels='Unnamed: 0', axis=1, inplace=True)
 
     ###########################Create working folder#################################
-    path = './data/Experiments/station_{}_3_years_all_stations/'.format(checked_station)
-    result_file_name = path + 'regression_all_stations_dataset_3_years.csv'
+    path = './data/Experiments/station_{}_1_years_all_stations_submit_test/'.format(checked_station)
+    result_file_name = path + 'regression_all_stations_dataset_1_years.csv'
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
     ###########################Script#################################
-
-    data_frame = copy_df.copy(deep=True)
+    data_frame = datafs.copy(deep=True)
 
     with open(result_file_name, 'w', newline='') as file:
         field_names = ['Days', 'Corr', 'K_best', 'Reg', 'Features', 'Mean absolute error']
@@ -51,22 +47,23 @@ if __name__ == '__main__':
         writer.writeheader()
 
         for day in days:
+            print('Added {} days'.format(day))
             addPreviousDaysFeatures(data_frame, day)
             for col in data_frame:
                 mean = data_frame[col].mean()
                 data_frame[col].fillna(mean, inplace=True)
-
+            # # If not working on merged file, use 'TD' instead of 'TD_{}' in all places above. # #
             for corr_hyper_param in corr_hyper_params:
                 label = data_frame['TD_{}'.format(checked_station)]
                 label = np.roll(label, -1)
                 label[(len(label) - 1)] = np.mean(label)
                 label = pd.DataFrame(label, columns=['TD_{}_tomorrow'.format(checked_station)]).fillna(label.mean())
                 new_data_frame = pd.concat([data_frame, label], axis=1)
-                correlations, predicators = getCorrelationOfDataForFeature(new_data_frame, 'TD_{}_tomorrow'.format(checked_station),
+                correlations, predicators = getCorrelationOfDataForFeature(new_data_frame,
+                                                                           'TD_{}_tomorrow'.format(checked_station),
                                                                            corr_hyper_param)
                 finale_data_frame = new_data_frame[predicators]
                 for select_k_hyper_param in select_k_best:
-                    print('day = {} corr = {} k = {}'.format(day, corr_hyper_param, select_k_hyper_param))
                     for reg in [Ridge(), Lasso(), ElasticNet(), SVR(), MLPRegressor(), RandomForestRegressor()]:
                         x = finale_data_frame
                         y = label
@@ -99,8 +96,14 @@ if __name__ == '__main__':
                                          'Mean absolute error': mean_absolute_error_res,
                                          })
 
-            data_frame = copy_df.copy(deep=True)
+            data_frame = datafs.copy(deep=True)
+
+
+if __name__ == '__main__':
+    start = str(datetime.now())
+    print('Started features finding at: {}'.format(start))
+
+    find_features_runner(raw_data_file_name="./data/merged_all_2019-4-1-2019-6-20.csv")
 
     end = str(datetime.now())
-    print("Starts experiment at: {}".format(start))
-    print("End experiment at: {}".format(end))
+    print("Ended features finding at: {}".format(end))

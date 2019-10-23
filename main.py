@@ -5,12 +5,10 @@ from LocationBasedDataProcess import *
 
 
 if __name__ == '__main__':
-    # # Get the channels Ids based on one example # #
-    #features = getChannelIds()
-    
-    # # Create data frame from a json file. # #
-    datafs = createDataFrame(file_name='yotvata_july_2019-7.json')
-
+    getStationRangeData(43, 2019, 9, 20, 2019, 10, 1)
+    file_name = '2019-9-20-2019-10-1'
+    technion_final_test_dataframe = createDataFrame(file_name='{}/_{}.json'.format(43, file_name))
+    technion_final_test_dataframe.to_csv('./data/{}/dataset_{}.csv'.format(43, file_name))
 
     """ 
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!UNKNOWN!!!!!!!!! ->
@@ -45,21 +43,5 @@ if __name__ == '__main__':
     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!UNKNOWN!!!!!!!!!  <-
     """
 
-    # Predict addons of multiple days and for changing corr hyper param (4/9/19)
-    for day_addon in range(29):
-    # try to classify.
-        print('DAY: {}!!!!!!!!'.format(day_addon))
-        addPreviousDaysFeatures(datafs, day_addon)
-        print("**corr**")
-        for col in datafs:
-            mean = datafs[col].mean()
-            datafs[col].fillna(mean, inplace=True)
 
-        for corr_hyper in np.arange(0.1, 1, 0.1):
-            print('################################# {} ##########################'.format(corr_hyper))
-            corr, pred = getCorrelationOfDataForFeature(datafs, 'TD')
-            new_dataframe = datafs[['TD'] + pred]
-            model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
-            ('********Final summary: {}'.format(model.summary()))
-            predict(x, y)
 

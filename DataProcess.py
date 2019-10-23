@@ -212,6 +212,12 @@ def getModelBackElimination(data_frame, predictors, feature):
 
 
 def predict(x, y):
+    """
+    Testing first time prediction
+    :param x:
+    :param y:
+    :return:
+    """
     test_size = 0.2 # TODO: HYPER PARAM
     random_state = 12 # TODO: HYPER PARAM
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=test_size, random_state=random_state)
@@ -247,6 +253,7 @@ def predict(x, y):
     print("The Mean Absolute Error: %.2f degrees celsius" % mean_absolute_error(y_test, prediction_ridge))
     print("The Median Absolute Error: %.2f degrees celsius" % median_absolute_error(y_test, prediction_ridge))
 
+
 def expr_1():
     """
     Create heatmap for technion station alone and for all stations together - for technion and merged.
@@ -256,6 +263,7 @@ def expr_1():
     addPreviousDaysFeatures(technion_station_dataframe, 5)
     createHeatMap(all_stations_dataframe)
     createHeatMap(technion_station_dataframe)
+
 
 def expr_2():
     """
@@ -269,13 +277,38 @@ def expr_2():
 
     new_dataframe_technion = technion_station_dataframe[['TD'] + predictors_technion]
     new_dataframe_technion = new_dataframe_technion.dropna()
-    new_dataframe_merged = all_stations_dataframe[['TD'] + predictors_merged]
+    new_dataframe_merged = all_stations_dataframe[['TD_43'] + predictors_merged]
     new_dataframe_merged = new_dataframe_merged.dropna()
-
+    print('1!!!')
     createRelationOfFeaturesToFeatureGraphs(new_dataframe_technion, 'TD', predictors_technion, len(predictors_technion), 1)
+    print('2!!!')
     createRelationOfFeaturesToFeatureGraphs(new_dataframe_merged, 'TD_43', predictors_merged, len(predictors_merged), 1)
 
 
+def expr_3():
+    """
+    Predict addons of multiple days and for changing corr hyper param.
+    """
+    technion_station_dataframe = pd.read_csv('./data/43/dataset_2019-9-20-2019-10-1.csv')
+    for day_addon in range(29):
+        # try to classify.
+        print('DAY: {}!!!!!!!!'.format(day_addon))
+        addPreviousDaysFeatures(technion_station_dataframe, day_addon)
+        print("**corr**")
+        for col in technion_station_dataframe:
+            mean = technion_station_dataframe[col].mean()
+            technion_station_dataframe[col].fillna(mean, inplace=True)
+
+        for corr_hyper in np.arange(0.1, 1, 0.1):
+            print('################################# {} ##########################'.format(corr_hyper))
+            corr, pred = getCorrelationOfDataForFeature(technion_station_dataframe, 'TD')
+            new_dataframe = technion_station_dataframe[['TD'] + pred]
+            model, x, y = getModelBackElimination(new_dataframe, pred, 'TD')
+            ('********Final summary: {}'.format(model.summary()))
+            predict(x, y)
+
+
 if __name__ == '__main__':
-    expr_1()
-    expr_2()
+    # expr_1()
+    #expr_2()
+    expr_3()
