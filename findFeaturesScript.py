@@ -1,4 +1,3 @@
-
 from pandas.io.json import json_normalize
 import csv
 import numpy as np
@@ -16,8 +15,7 @@ import sklearn.metrics
 import matplotlib.pyplot as plt
 
 
-def find_features_runner(raw_data_file_name):
-
+def find_features_runner(raw_data_file_name, output_path_name, output_file_name):
     datafs = pd.read_csv(raw_data_file_name)
 
     ###########################Global Parameters###########################
@@ -34,8 +32,8 @@ def find_features_runner(raw_data_file_name):
     datafs.drop(labels='Unnamed: 0', axis=1, inplace=True)
 
     ###########################Create working folder#################################
-    path = './data/Experiments/station_{}_1_years_all_stations_submit_test/'.format(checked_station)
-    result_file_name = path + 'regression_all_stations_dataset_1_years.csv'
+    path = './data/Experiments/station_{}_{}/'.format(checked_station, output_path_name)
+    result_file_name = path + output_file_name
     pathlib.Path(path).mkdir(parents=True, exist_ok=True)
 
     ###########################Script#################################
@@ -103,7 +101,9 @@ if __name__ == '__main__':
     start = str(datetime.now())
     print('Started features finding at: {}'.format(start))
 
-    find_features_runner(raw_data_file_name="./data/merged_all_2019-4-1-2019-6-20.csv")
+    find_features_runner(raw_data_file_name="./data/merged_all_2019-4-1-2019-6-20.csv",
+                         output_path_name='1_years_all_stations_submit_test',
+                         output_file_name='regression_all_stations_dataset_1_years.csv')
 
     end = str(datetime.now())
     print("Ended features finding at: {}".format(end))

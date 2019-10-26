@@ -8,6 +8,13 @@ apiToken = 'ApiToken f058958a-d8bd-47cc-95d7-7ecf98610e47'
 
 
 def getStations(station=-1, file_name="stations_data"):
+    """
+    Creates all stations data (e.g. location, active status, etc.).
+    Creates a json file which contains the data.
+    :param station: Station id for specific station data.
+    :param file_name: name of
+    :return: json type element containing the data.
+    """
     response = requests.get('https://api.ims.gov.il/v1/envista/stations/',
                             headers={'Authorization': apiToken}) if station == -1 else requests.get(
         'https://api.ims.gov.il/v1/envista/stations/{}'.format(station),

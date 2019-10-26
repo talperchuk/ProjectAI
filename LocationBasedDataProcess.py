@@ -108,24 +108,25 @@ def prep_3():
         merged_datasets.append(merged)
         merged.to_csv('./data/43/merged_{}.csv'.format(k))
 
-def create_data_for_all_stations():
+
+def create_data_for_all_stations(raw_data_dates, year_b, month_b, day_b, year_e, month_e, day_e, retrieve_data=True):
     stations = getStationsLocations()
-    not_in_st = [35, 89, 99, 257, 265, 270]
+    not_in_st = [35, 89, 99, 115, 257, 265, 270]  # Problematic stations.
     data = {}
     for station in stations.keys():
-        if station not in not_in_st and station <= -1: # change the zero if needed to load stations after failure.
-            dfcolumns = pd.read_csv('./data/{}/dataset_2016-1-1-2019-10-1.csv'.format(station), nrows=1)
-            data[station] = pd.read_csv('./data/{}/dataset_2016-1-1-2019-10-1.csv'.format(station), index_col=[0], usecols=list(range(len(dfcolumns.columns))))
-        if station not in not_in_st and station > -1:
-            file_name = str(station) + '/_2016-1-1-2019-10-1.json'
+        if (station not in not_in_st and retrieve_data is False) or (station not in not_in_st and station < 115):  # data already exists and no need to withdraw it.
+            dfcolumns = pd.read_csv('./data/{}/dataset_{}.csv'.format(station, raw_data_dates), nrows=1)
+            data[station] = pd.read_csv('./data/{}/dataset_{}.csv'.format(station, raw_data_dates), index_col=[0], usecols=list(range(len(dfcolumns.columns))))
+        if (station not in not_in_st and retrieve_data is True) or (station not in not_in_st and station >= 115):  # need to withdraw data
+            file_name = str(station) + '/_{}.json'.format(raw_data_dates)
             print(file_name)
-            getStationRangeData(station, 2016, 1, 1, 2019, 10, 1) # # get data from server.
+            if retrieve_data is True:
+                getStationRangeData(station, year_b, month_b, day_b, year_e, month_e, day_e) # # get data from server.
             data[station] = createDataFrame(file_name)
             # exported data_set for faster loading.
-            data[station].to_csv('./data/{}/dataset_2016-1-1-2019-10-1.csv'.format(station))
+            data[station].to_csv('./data/{}/dataset_{}.csv'.format(station, raw_data_dates))
     merged = mergeKStationsDataSets(data)
-    merged.to_csv('./data/merged_all_2016-1-1-2019-10-1.csv')
-
+    merged.to_csv('./data/merged_all_{}.csv'.format(raw_data_dates))
 
 
 def locations_main_runner():
@@ -136,7 +137,7 @@ def locations_main_runner():
     # prep_1('_2019-8')
     # prep_2()
     # prep_3()
-    create_data_for_all_stations()
+    create_data_for_all_stations('2016-1-1-2019-10-1', 2016, 1, 1, 2019, 10, 1)
     return True
 
 if __name__ == '__main__':

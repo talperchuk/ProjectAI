@@ -2,7 +2,7 @@ import requests
 import json
 import pandas as pd
 
-#data of specific time measurment used for getting channels ids.
+#data of specific general time measurment used for getting channels ids.
 data = [{"id": 1, "name": "WSmax", "alias": 0, "value": 2.1, "status": 2, "valid": False, "description": 0},
         {"id": 2, "name": "WDmax", "alias": 0, "value": 302.0, "status": 2, "valid": False, "description": 0}, 
         {"id": 3, "name": "WS", "alias": 0, "value": 1.2, "status": 2, "valid": False, "description": 0}, 
@@ -21,6 +21,10 @@ data = [{"id": 1, "name": "WSmax", "alias": 0, "value": 2.1, "status": 2, "valid
         {"id": 20, "name": "Rain", "alias": 0, "value": 0.0, "status": 1, "valid": True, "description": 0}]
 
 def getChannelIds():
+    """
+    Iterating over data to return all castings between feature name and its id.
+    :return: Dictionary of names as keys and ids as values.
+    """
     res = {}
     for row in data:
         res[row["name"]] = row["id"]

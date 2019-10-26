@@ -213,10 +213,9 @@ def getModelBackElimination(data_frame, predictors, feature):
 
 def predict(x, y):
     """
-    Testing first time prediction
-    :param x:
-    :param y:
-    :return:
+    Testing first time prediction for some specific linear regression models.
+    :param x: train set
+    :param y: test set
     """
     test_size = 0.2 # TODO: HYPER PARAM
     random_state = 12 # TODO: HYPER PARAM
