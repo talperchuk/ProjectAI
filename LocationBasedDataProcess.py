@@ -111,13 +111,17 @@ def prep_3():
 
 def create_data_for_all_stations(raw_data_dates, year_b, month_b, day_b, year_e, month_e, day_e, retrieve_data=True):
     stations = getStationsLocations()
-    not_in_st = [35, 89, 99, 115, 257, 265, 270]  # Problematic stations.
+    not_in_st = [35, 89, 99, 115, 257, 265, 270]  # Problematic stations where server marked as active, but returned no information.
     data = {}
     for station in stations.keys():
-        if (station not in not_in_st and retrieve_data is False) or (station not in not_in_st and station < 115):  # data already exists and no need to withdraw it.
+        if (station not in not_in_st and retrieve_data is False) or (station not in not_in_st and station < 0):
+            # data already exists and no need to withdraw it. This is relevant only for server corrupted data issues.
+            # in case of failing in some information received from the server, change 0 to be the station the first
+            # failed, then rerun the function. Please also change the 0 in the next if statement.
             dfcolumns = pd.read_csv('./data/{}/dataset_{}.csv'.format(station, raw_data_dates), nrows=1)
             data[station] = pd.read_csv('./data/{}/dataset_{}.csv'.format(station, raw_data_dates), index_col=[0], usecols=list(range(len(dfcolumns.columns))))
-        if (station not in not_in_st and retrieve_data is True) or (station not in not_in_st and station >= 115):  # need to withdraw data
+        if (station not in not_in_st and retrieve_data is True) or (station not in not_in_st and station >= 0):
+            # need to withdraw data
             file_name = str(station) + '/_{}.json'.format(raw_data_dates)
             print(file_name)
             if retrieve_data is True:
@@ -137,7 +141,7 @@ def locations_main_runner():
     # prep_1('_2019-8')
     # prep_2()
     # prep_3()
-    create_data_for_all_stations('2016-1-1-2019-10-1', 2016, 1, 1, 2019, 10, 1)
+    create_data_for_all_stations('2016-1-1-2019-10-1', 2016, 1, 1, 2019, 10, 1)  # change for the relevant days.
     return True
 
 if __name__ == '__main__':

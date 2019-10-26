@@ -96,6 +96,11 @@ def preparedDF(copy_df, missing_threshold):
 
 
 def createDataFrame(file_name):
+    """
+    Created a new data frame based on json file which contains data withdrawn from server.
+    :param file_name: Name of the server data file.
+    :return: New data frame.
+    """
     features_list = list(getChannelIds())
     features_list.append('datetime')
     id, times, channels, measurements = getChannelsDataFromJSON(file_name=file_name)
@@ -111,17 +116,21 @@ def createDataFrame(file_name):
     for frame in data_frames_per_day:
         data_frames_per_day[frame] = data_frames_per_day[frame].mean(axis=0)
     returned_df = pd.DataFrame(data_frames_per_day).transpose()
-    #returned_df.to_csv('./data/df_without_wind_directions.csv')
     returned_df = preparedDF(returned_df, 0.25)
     wd_feature = setWDForOHE(returned_df)
     if not wd_feature:
         return returned_df
     returned_df = setOHEToDF(returned_df, wd_feature)
-    #returned_df.to_csv('./data/df_with_wind_directions.csv')
     return returned_df
 
 
 def addPreviousDaysPerFeature(data_frame, feature, amount=1):
+    """
+    Adds for data frame and a specific feature features which are based on the previous days of the feature.
+    :param data_frame: Data frame for which features will be added to.
+    :param feature: Name of the feature.
+    :param amount: Amount of previous days to be added.
+    """
     rows_size = data_frame.shape[0]
     new_column = [np.NaN] * amount
     new_column = new_column + [data_frame[feature][i-amount] for i in range(amount, rows_size)]
@@ -130,6 +139,11 @@ def addPreviousDaysPerFeature(data_frame, feature, amount=1):
 
 
 def addPreviousDaysFeatures(data_frame, amount=1):
+    """
+    Adds previous days features as the amount received for all data frame current features.
+    :param data_frame: Data frame for which features will be added to.
+    :param amount: Amount of previous days to be added.
+    """
     features = list(data_frame)
     for feature in features:
         for i in range(1, amount):
@@ -176,6 +190,9 @@ def createRelationOfFeaturesToFeatureGraphs(data_frame, main_feature, predicator
 
 
 def createHeatMap(data_frame, features=[]):
+    """
+    Used at the first stages to understand correlations between features.
+    """
     data_frame_features = list(data_frame) if features == [] else features
     data_frame_selected = data_frame[data_frame_features]
     plt.figure(figsize=(100, 100))
@@ -213,6 +230,7 @@ def getModelBackElimination(data_frame, predictors, feature):
 
 def predict(x, y):
     """
+    Used at the first stages to predict using some specific models - next stages code was based on this test.
     Testing first time prediction for some specific linear regression models.
     :param x: train set
     :param y: test set
@@ -310,4 +328,5 @@ def expr_3():
 if __name__ == '__main__':
     # expr_1()
     #expr_2()
-    expr_3()
+    #expr_3()
+    pass

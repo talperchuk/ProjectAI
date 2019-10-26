@@ -12,7 +12,7 @@ def getStations(station=-1, file_name="stations_data"):
     Creates all stations data (e.g. location, active status, etc.).
     Creates a json file which contains the data.
     :param station: Station id for specific station data.
-    :param file_name: name of
+    :param file_name: Beginning name for the output file.
     :return: json type element containing the data.
     """
     response = requests.get('https://api.ims.gov.il/v1/envista/stations/',
@@ -26,6 +26,14 @@ def getStations(station=-1, file_name="stations_data"):
 
 
 def getStationDailyData(station, channel=-1, file_name=""):
+    """
+    Creates data for the current day for specific station.
+    Creates a json file which contains the data.
+    :param station: Station id for specific station data.
+    :param channel: Specific channel to create data for (instead of creating for all channels).
+    :param file_name: Beginning name for the output file.
+    :return: json type element containing the data.
+    """
     response = requests.get('https://api.ims.gov.il/v1/envista/stations/{}/data/daily'.format(station),
                             headers={'Authorization': apiToken}) if channel == -1 else requests.get(
         'https://api.ims.gov.il/v1/envista/stations/{}/data/{}/daily'.format(station, channel),
@@ -39,6 +47,14 @@ def getStationDailyData(station, channel=-1, file_name=""):
 
 
 def getStationMonthlyData(station, channel=-1, file_name=""):
+    """
+    Creates data for the current month for specific station.
+    Creates a json file which contains the data.
+    :param station: Station id for specific station data.
+    :param channel: Specific channel to create data for (instead of creating for all channels).
+    :param file_name: Beginning name for the output file.
+    :return: json type element containing the data.
+    """
     response = requests.get('https://api.ims.gov.il/v1/envista/stations/{}/data/monthly'.format(station),
                             headers={'Authorization': apiToken}) if channel == -1 else requests.get(
         'https://api.ims.gov.il/v1/envista/stations/{}/data/{}/monthly'.format(station, channel),
@@ -52,6 +68,17 @@ def getStationMonthlyData(station, channel=-1, file_name=""):
 
 
 def getStationDailyDataForDate(station, year, month, day, channel=-1, file_name=""):
+    """
+    Creates data for a specific date.
+    Creates a json file which contains the data.
+    :param station: Station id for specific station data.
+    :param year: Year of the date (e.g. 2019).
+    :param month: Month of the date (e.g. 10).
+    :param day: Day of the date (e.g. 25).
+    :param channel: Specific channel to create data for (instead of creating for all channels).
+    :param file_name: Beginning name for the output file.
+    :return: json type element containing the data.
+    """
     response = requests.get('https://api.ims.gov.il/v1/envista/stations/{}/data/daily/{}/{}/{}'.format(station, year, month, day),
                             headers={'Authorization': apiToken}) if channel == -1 else requests.get(
         'https://api.ims.gov.il/v1/envista/stations/{}/data/{}/daily/{}/{}/{}'.format(station, channel, year, month, day),
@@ -65,6 +92,16 @@ def getStationDailyDataForDate(station, year, month, day, channel=-1, file_name=
 
 
 def getStationMonthlyDataForMonth(station, year, month, channel=-1, file_name=""):
+    """
+    Creates data for a specific month.
+    Creates a json file which contains the data.
+    :param station: Station id for specific station data.
+    :param year: Year of the date (e.g. 2019).
+    :param month: Month of the date (e.g. 10).
+    :param channel: Specific channel to create data for (instead of creating for all channels).
+    :param file_name: Beginning name for the output file.
+    :return: json type element containing the data.
+    """
     response = requests.get('https://api.ims.gov.il/v1/envista/stations/{}/data/monthly/{}/{}'.format(station, year, month),
                             headers={'Authorization': apiToken}) if channel == -1 else requests.get(
         'https://api.ims.gov.il/v1/envista/stations/{}/data/{}/monthly/{}/{}'.format(station, channel, year, month),
@@ -78,6 +115,20 @@ def getStationMonthlyDataForMonth(station, year, month, channel=-1, file_name=""
 
 
 def getStationRangeData(station, start_year, start_month, start_day, end_year, end_month, end_day, channel=-1, file_name=""):
+    """
+    Create data for range of dates.
+    Creates a json file which contains the data.
+    :param station: Station id for specific station data.
+    :param start_year: Year of the first date.
+    :param start_month: Month of the first date.
+    :param start_day: Day of the first date.
+    :param end_year: Year of the second date.
+    :param end_month: Month of the second date.
+    :param end_day: Day of the second date.
+    :param channel: Specific channel to create data for (instead of creating for all channels).
+    :param file_name: Beginning name for the output file.
+    :return: json type element containing the data.
+    """
     response = requests.get('https://api.ims.gov.il/v1/envista/stations/{}/data?from={}/{}/{}&to={}/{}/{}'.format(station, start_year, start_month, start_day, end_year, end_month, end_day),
                             headers={'Authorization': apiToken}) if channel == -1 else requests.get(
         'https://api.ims.gov.il/v1/envista/stations/{}/data/{}?from={}/{}/{}&to={}/{}/{}'.format(station, channel, start_year, start_month, start_day, end_year, end_month, end_day),
