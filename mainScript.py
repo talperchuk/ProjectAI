@@ -62,12 +62,12 @@ param_grid = {
 }
 
 feature_regressions_map = {
-    'Ridge': pd.read_csv("./data/Experiments/station_22_station22_test/best_features_Ridge.csv")['Features'],
-    'Lasso': pd.read_csv("./data/Experiments/station_22_station22_test/best_features_Lasso.csv")['Features'],
-    'ElasticNet': pd.read_csv("./data/Experiments/station_22_station22_test/best_features_ElasticNet.csv")['Features'],
-    'SVR': pd.read_csv("./data/Experiments/station_22_station22_test/best_features_SVR.csv")['Features'],
-    'MLPRegression': pd.read_csv("./data/Experiments/station_22_station22_test/best_features_MLPRegressor.csv")['Features'],
-    'RFR': pd.read_csv("./data/Experiments/station_22_station22_test/best_features_RFR.csv")['Features'],
+    'Ridge': pd.read_csv("./data/Experiments/station_43_1_years_all_stations_submit_test/best_features/best_features_Ridge.csv")['Features'],
+    'Lasso': pd.read_csv("./data/Experiments/station_43_1_years_all_stations_submit_test/best_features/best_features_Lasso.csv")['Features'],
+    'ElasticNet': pd.read_csv("./data/Experiments/station_43_1_years_all_stations_submit_test/best_features/best_features_ElasticNet.csv")['Features'],
+    'SVR': pd.read_csv("./data/Experiments/station_43_1_years_all_stations_submit_test/best_features/best_features_SVR.csv")['Features'],
+    'MLPRegression': pd.read_csv("./data/Experiments/station_43_1_years_all_stations_submit_test/best_features/best_features_MLPRegressor.csv")['Features'],
+    'RFR': pd.read_csv("./data/Experiments/station_43_1_years_all_stations_submit_test/best_features/best_features_RFR.csv")['Features'],
 }
 
 mean_absolute_error_scorer = make_scorer(mean_absolute_error)
@@ -75,14 +75,14 @@ mean_absolute_error_scorer = make_scorer(mean_absolute_error)
 
 def main_script_runner(raw_data_file_name, using_merged=False):
     ###########################Chosen Station###########################
-    checked_station = 22
+    checked_station = 43
 
     ###########################Chosen Feature###########################
     checked_feature = 'TD' if using_merged is False else 'TD_{}'.format(checked_station)
 
     # Create path folders if needed
     # Main path where data will be saved.
-    path = './data/Experiments/station_22_station22_test'
+    path = './data/Experiments/station_43_1_years_all_stations_submit_test'
     # Results folder within the path location.
     path_results = path + '/grid_search_resultes/'
     pathlib.Path(path_results).mkdir(parents=True, exist_ok=True)
@@ -104,7 +104,7 @@ def main_script_runner(raw_data_file_name, using_merged=False):
 
 if __name__ == '__main__':
     print('Started main script...')
-    main_script_runner(raw_data_file_name='./data/22/dataset_2019-9-1-2019-10-5.csv', using_merged=False)
+    main_script_runner(raw_data_file_name='./data/merged_all_2019-7-1-2019-9-1.csv', using_merged=True)
 
 
 
