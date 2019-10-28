@@ -10,12 +10,13 @@ from sklearn.feature_selection import SelectKBest, f_regression
 from sklearn.model_selection import GridSearchCV, KFold
 from sklearn.metrics import *
 from datetime import datetime
+import sys
 from statistics import mean
 import sklearn.metrics
 import matplotlib.pyplot as plt
 
 
-def find_features_runner(raw_data_file_name, output_path_name, output_file_name):
+def find_features_runner(raw_data_file_name, output_path_name, output_file_name, using_merged=False):
     datafs = pd.read_csv(raw_data_file_name)
 
     ###########################Global Parameters###########################
@@ -25,7 +26,10 @@ def find_features_runner(raw_data_file_name, output_path_name, output_file_name)
     select_k_best = [5, 20, 40, 60, 80, 100]
 
     ###########################Chosen Station###########################
-    checked_station = 43
+    checked_station = 22
+
+    ###########################Chosen Feature###########################
+    checked_feature = 'TD' if using_merged is False else 'TD_{}'.format(checked_station)
 
     ######Add this if reading from "merged" files#####################
     ######Drop missing columns with thrashold over missing_threshold value#######
@@ -52,13 +56,13 @@ def find_features_runner(raw_data_file_name, output_path_name, output_file_name)
                 data_frame[col].fillna(mean, inplace=True)
             # # If not working on merged file, use 'TD' instead of 'TD_{}' in all places above. # #
             for corr_hyper_param in corr_hyper_params:
-                label = data_frame['TD_{}'.format(checked_station)]
+                label = data_frame[checked_feature]
                 label = np.roll(label, -1)
                 label[(len(label) - 1)] = np.mean(label)
-                label = pd.DataFrame(label, columns=['TD_{}_tomorrow'.format(checked_station)]).fillna(label.mean())
+                label = pd.DataFrame(label, columns=[checked_feature + '_tomorrow']).fillna(label.mean())
                 new_data_frame = pd.concat([data_frame, label], axis=1)
                 correlations, predicators = getCorrelationOfDataForFeature(new_data_frame,
-                                                                           'TD_{}_tomorrow'.format(checked_station),
+                                                                           checked_feature + '_tomorrow',
                                                                            corr_hyper_param)
                 finale_data_frame = new_data_frame[predicators]
                 for select_k_hyper_param in select_k_best:
@@ -101,9 +105,10 @@ if __name__ == '__main__':
     start = str(datetime.now())
     print('Started features finding at: {}'.format(start))
 
-    find_features_runner(raw_data_file_name="./data/merged_all_2019-4-1-2019-6-20.csv",
-                         output_path_name='1_years_all_stations_submit_test',
-                         output_file_name='regression_all_stations_dataset_1_years.csv')
+    find_features_runner(raw_data_file_name="./data/22/dataset_2019-9-1-2019-10-5.csv",
+                         output_path_name='final_sub_path',
+                         output_file_name='regression_all_stations_dataset_final_sub.csv',
+                         using_merged=False)
 
     end = str(datetime.now())
     print("Ended features finding at: {}".format(end))
