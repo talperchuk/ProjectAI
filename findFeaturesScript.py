@@ -26,7 +26,7 @@ def find_features_runner(raw_data_file_name, output_path_name, output_file_name,
     select_k_best = [5, 20, 40, 60, 80, 100]
 
     ###########################Chosen Station###########################
-    checked_station = 22
+    checked_station = 43
 
     ###########################Chosen Feature###########################
     checked_feature = 'TD' if using_merged is False else 'TD_{}'.format(checked_station)
@@ -105,10 +105,10 @@ if __name__ == '__main__':
     start = str(datetime.now())
     print('Started features finding at: {}'.format(start))
 
-    find_features_runner(raw_data_file_name="./data/22/dataset_2019-9-1-2019-10-5.csv",
-                         output_path_name='final_sub_path',
-                         output_file_name='regression_all_stations_dataset_final_sub.csv',
-                         using_merged=False)
+    find_features_runner(raw_data_file_name="./data/merged_all_2019-7-1-2019-9-1.csv",
+                         output_path_name='7-8_2019_all_stations_example',
+                         output_file_name='regression_all_stations_dataset_7-8_2019.csv',
+                         using_merged=True)
 
     end = str(datetime.now())
     print("Ended features finding at: {}".format(end))
