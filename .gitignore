@@ -26,3 +26,4 @@
 
 #TOO_BIG FILES
 data/*_TOO_BIG.json
+*_TOO_BIG.json
