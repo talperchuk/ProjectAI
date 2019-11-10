@@ -1,4 +1,8 @@
 # **ProjectAI**
+This project was made as part of Project in Artificial Intelligence course taken during my BSc in Computer Science in the Technion.
+Our main goal was to learn the basics of weather prediction - using machine learning techniques such as linear regression, and what might be the impact of it in the future. 
+
+
 _Project files_:
 #### DataRetrival.py
 Used for retriving data from the Israeli Meteorological Service API.
